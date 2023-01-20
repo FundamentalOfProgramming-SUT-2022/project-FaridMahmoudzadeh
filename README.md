@@ -1,2 +1,1 @@
-Name: Farid Mahmoudzadeh
-Student No: 401106493
+Farid Mahmoudzadeh 401106493
