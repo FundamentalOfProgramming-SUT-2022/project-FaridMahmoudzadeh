@@ -9,6 +9,13 @@
 #include <io.h>
 #include <unistd.h>
 
+
+char clipboard[10000] = {'\0'};
+
+bool isCut = false;
+
+
+
 void start();
 
 void BackslashFix(char str[]);
@@ -23,6 +30,12 @@ void cat(char path[]);
 
 void removestr(char path[], int line, int point, int size, char type);
 
+void copy(char path[], int line, int point, int size, char type);
+
+void cut(char path[], int line, int point, int size, char type);
+
+void paste(char path[], int line, int point);
+
 
 
 int main() {
@@ -30,6 +43,8 @@ int main() {
     start();
 
 }
+
+
 
 void start(){
 
@@ -85,7 +100,7 @@ void start(){
             cat(path);
         }
 
-        else if(strcmp(command,"removestr")) {
+        else if(strcmp(command,"removestr") == 0) {
             getchar();
             scanf("%s",temp);
             getchar();
@@ -107,7 +122,74 @@ void start(){
             scanf(" %d -%c", &size, &type);
             removestr(path, line, point, size, type);
         }
+
+        else if(strcmp(command,"copystr") == 0) {
+            getchar();
+            scanf("%s",temp);
+            getchar();
+            char c = getchar();
+            char path[100];
+            if(c == '"') {
+                getchar();
+                scanf("%[^\"]s",path);
+                getchar();
+            }
+            else if(c == '/') scanf("%s",path);
+            getchar();
+            scanf("%s",temp);
+            int line, point;
+            scanf(" %d:%d ", &line, &point);
+            scanf("%s",temp);
+            int size; 
+            char type;
+            scanf(" %d -%c", &size, &type);
+            copy(path, line, point, size, type);
+        }
+
+        else if(strcmp(command,"cutstr") == 0) {
+            getchar();
+            scanf("%s",temp);
+            getchar();
+            char c = getchar();
+            char path[100];
+            if(c == '"') {
+                getchar();
+                scanf("%[^\"]s",path);
+                getchar();
+            }
+            else if(c == '/') scanf("%s",path);
+            getchar();
+            scanf("%s",temp);
+            int line, point;
+            scanf(" %d:%d ", &line, &point);
+            scanf("%s",temp);
+            int size; 
+            char type;
+            scanf(" %d -%c", &size, &type);
+            cut(path, line, point, size, type);
+        }
+
+        else if(strcmp(command,"pastestr") == 0) {
+            getchar();
+            scanf("%s",temp);
+            getchar();
+            char c = getchar();
+            char path[100];
+            if(c == '"') {
+                getchar();
+                scanf("%[^\"]s",path);
+                getchar();
+            }
+            else if(c == '/') scanf("%s",path);
+            getchar();
+            scanf("%s",temp);
+            int line, point;
+            scanf(" %d:%d", &line, &point);
+            paste(path, line, point);
+        }
+
     }
+
 }
 
 void BackslashFix(char str[]){
@@ -257,7 +339,7 @@ void cat(char path[]){
 
 void removestr(char path[], int line, int point, int size, char type){
     if(fopen(path,"r") == 0){
-        printf("File With This Name Doesn't Exist!\n");
+        if(!isCut) printf("File With This Name Doesn't Exist!\n");
         return;
     }
     FILE *file;
@@ -271,7 +353,7 @@ void removestr(char path[], int line, int point, int size, char type){
         {
             c = fgetc(file);
             if(c == EOF){
-                printf("This Position Doesn't Exist!\n");
+                if(!isCut) printf("This Position Doesn't Exist!\n");
                 fclose(file);
                 return;
             }
@@ -287,7 +369,7 @@ void removestr(char path[], int line, int point, int size, char type){
         for(int counter = 0; counter < size; counter++){
             c = fgetc(file);
             if(c == EOF){
-                printf("Not Enough Characters to Remove\n");
+                if(!isCut) printf("Not Enough Characters to Remove\n");
                 fclose(file);
                 return;
             }
@@ -315,7 +397,7 @@ void removestr(char path[], int line, int point, int size, char type){
         {
             c = fgetc(file);
             if(c == EOF){
-                printf("This Position Doesn't Exist!\n");
+                if(!isCut) printf("This Position Doesn't Exist!\n");
                 fclose(file);
                 return;
             }
@@ -345,7 +427,91 @@ void removestr(char path[], int line, int point, int size, char type){
         fclose(file);        
     }
     else {
+        if(!isCut) printf("Invalid Type\n");
+        fclose(file);
+    }
+}
+
+void copy(char path[], int line, int point, int size, char type){
+    if(fopen(path,"r") == 0){
+        printf("File With This Name Doesn't Exist!\n");
+        return;
+    }
+    FILE *file;
+    file = fopen(path,"r");
+    if(type == 'f'){
+        int i = 1, j = 0;
+        char c;
+        while (i != line || j != point)
+        {
+            c = fgetc(file);
+            if(c == EOF){
+                printf("This Position Doesn't Exist!\n");
+                fclose(file);
+                return;
+            }
+            j++;
+            if(c == '\n'){
+                i++;
+                j = 0;
+            }
+        }
+        char copy[10000] = {};
+        for(int counter = 0; counter < size; counter++){
+            c = fgetc(file);
+            if(c == EOF){
+                if (!isCut) printf("Not Enough Characters to Copy\n");
+                else printf("Not Enough Characters to Cut\n");
+                fclose(file);
+                return;
+            }
+            copy[counter] = c;
+            copy[counter + 1] = '\0';
+        }
+        fclose(file);
+        clipboard[0] = '\0';
+        strcpy(clipboard, copy);
+    }
+    else if(type == 'b'){
+        int i = 1, j = 0;
+        char c;
+        char copy[10000] = {};
+        int x = 0;
+        while (i != line || j != point)
+        {
+            c = fgetc(file);
+            if(c == EOF){
+                printf("This Position Doesn't Exist!\n");
+                fclose(file);
+                return;
+            }
+            j++;
+            copy[x] = c;
+            copy[x + 1] = '\0';
+            x++;
+            if(c == '\n'){
+                i++;
+                j = 0;
+            }
+        }
+        memmove(&copy[0], &copy[strlen(copy) - size], size);
+        clipboard[0] = '\0';
+        strcpy(clipboard, copy);
+        fclose(file);
+    }
+    else {
         printf("Invalid Type\n");
         fclose(file);
     }
+}
+
+void cut(char path[], int line, int point, int size, char type){
+    isCut = true;
+    copy(path, line, point, size, type);
+    removestr(path, line, point, size, type);
+    isCut = false;
+}
+
+void paste(char path[], int line, int point){
+    insert(path, clipboard, line, point);
 }
