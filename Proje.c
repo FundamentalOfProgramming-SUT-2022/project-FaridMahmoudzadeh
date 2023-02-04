@@ -19,6 +19,11 @@ void createfile(char path[]);
 
 void insert(char path[],char str[],int line,int point);
 
+void cat(char path[]);
+
+void removestr(char path[], int line, int point, int size, char type);
+
+
 
 int main() {
 
@@ -69,6 +74,38 @@ void start(){
             int line, point;
             scanf(" %d:%d",&line ,&point);
             insert(path,str,line,point);
+        }
+
+        else if(strcmp(command,"cat") == 0) {
+            getchar();
+            scanf("%s",temp);
+            getchar();
+            char path[100];
+            gets(path);
+            cat(path);
+        }
+
+        else if(strcmp(command,"removestr")) {
+            getchar();
+            scanf("%s",temp);
+            getchar();
+            char c = getchar();
+            char path[100];
+            if(c == '"') {
+                getchar();
+                scanf("%[^\"]s",path);
+                getchar();
+            }
+            else if(c == '/') scanf("%s",path);
+            getchar();
+            scanf("%s",temp);
+            int line, point;
+            scanf(" %d:%d ", &line, &point);
+            scanf("%s",temp);
+            int size; 
+            char type;
+            scanf(" %d -%c", &size, &type);
+            removestr(path, line, point, size, type);
         }
     }
 }
@@ -161,6 +198,7 @@ void insert(char path[],char str[],int line,int point){
         c = fgetc(file);
         if(c == EOF){
             printf("This Position Doesn't Exist!\n");
+            fclose(file);
             return;
         }
         j++;
@@ -187,4 +225,127 @@ void insert(char path[],char str[],int line,int point){
     file = fopen(path,"w");
     fprintf(file,"%s%s%s",beforestr,str,afterstr);
     fclose(file);
+}
+
+void cat(char path[]){
+    if(path[0] == '"'){
+        path[strlen(path) - 1] = '\0';
+        memmove(&path[0], &path[2], strlen(path) - 1);
+    }
+    else if(path[0] == '/'){
+        memmove(&path[0], &path[1], strlen(path));
+    }
+    if(fopen(path,"r") == 0){
+        printf("File With This Name Doesn't Exist!\n");
+        return;
+    }
+    FILE *file;
+    file = fopen(path,"r");
+    char c;
+    int i = 0;
+    char contents[10000];
+    while(1){
+        c = fgetc(file);
+        if(c == EOF) break;
+        contents[i] = c;
+        i++;
+        contents[i] = '\0';
+    }
+    fclose(file);
+    printf("%s\n",contents);
+}
+
+void removestr(char path[], int line, int point, int size, char type){
+    if(fopen(path,"r") == 0){
+        printf("File With This Name Doesn't Exist!\n");
+        return;
+    }
+    FILE *file;
+    file = fopen(path,"r");
+    if(type == 'f'){
+        int i = 1, j = 0;
+        char c;
+        char rest[10000] = {};
+        int x = 0;
+        while (i != line || j != point)
+        {
+            c = fgetc(file);
+            if(c == EOF){
+                printf("This Position Doesn't Exist!\n");
+                fclose(file);
+                return;
+            }
+            j++;
+            rest[x] = c;
+            rest[x + 1] = '\0';
+            x++;
+            if(c == '\n'){
+                i++;
+                j = 0;
+            }
+        }
+        for(int counter = 0; counter < size; counter++){
+            c = fgetc(file);
+            if(c == EOF){
+                printf("Not Enough Characters to Remove\n");
+                fclose(file);
+                return;
+            }
+        }
+        while(1){
+            c = fgetc(file);
+            if(c == EOF){
+                break;
+            }
+            rest[x] = c;
+            rest[x + 1] = '\0';
+            x++;
+        }
+        fclose(file);
+        file = fopen(path,"w");
+        fprintf(file,"%s",rest);
+        fclose(file);
+    }
+    else if(type == 'b'){
+        int i = 1, j = 0;
+        char c;
+        char rest[10000] = {};
+        int x = 0;
+        while (i != line || j != point)
+        {
+            c = fgetc(file);
+            if(c == EOF){
+                printf("This Position Doesn't Exist!\n");
+                fclose(file);
+                return;
+            }
+            j++;
+            rest[x] = c;
+            rest[x + 1] = '\0';
+            x++;
+            if(c == '\n'){
+                i++;
+                j = 0;
+            }
+        }
+        rest[strlen(rest) - size] = '\0';
+        x -= size;
+        while(1){
+            c = fgetc(file);
+            if(c == EOF){
+                break;
+            }
+            rest[x] = c;
+            rest[x + 1] = '\0';
+            x++;
+        }
+        fclose(file);
+        file = fopen(path,"w");
+        fprintf(file,"%s",rest);
+        fclose(file);        
+    }
+    else {
+        printf("Invalid Type\n");
+        fclose(file);
+    }
 }
