@@ -9,12 +9,9 @@
 #include <io.h>
 #include <unistd.h>
 
-
 char clipboard[10000] = {'\0'};
 
 bool isCut = false;
-
-
 
 void start();
 
@@ -24,7 +21,7 @@ void getstring(char c, char str[]);
 
 void createfile(char path[]);
 
-void insert(char path[],char str[],int line,int point);
+void insert(char path[], char str[], int line, int point);
 
 void cat(char path[]);
 
@@ -36,183 +33,217 @@ void cut(char path[], int line, int point, int size, char type);
 
 void paste(char path[], int line, int point);
 
+void indenting(char contents[]);
 
+void ClosingPairs(char path[]);
 
-int main() {
+int main()
+{
 
     start();
-
 }
 
-
-
-void start(){
+void start()
+{
 
     char command[100];
 
     char temp[50];
 
-    while(1){
+    while (1)
+    {
 
-        scanf("%s",command);
+        scanf("%s", command);
 
-        if(strcmp(command,"exit") == 0) return;
+        if (strcmp(command, "exit") == 0)
+            return;
 
-        else if(strcmp(command,"createfile") == 0) {
+        else if (strcmp(command, "createfile") == 0)
+        {
             getchar();
-            scanf("%s",temp);
+            scanf("%s", temp);
             getchar();
             char path[100];
             gets(path);
             createfile(path);
         }
 
-        else if(strcmp(command,"insertstr") == 0) {
+        else if (strcmp(command, "insertstr") == 0)
+        {
             getchar();
-            scanf("%s",temp);
+            scanf("%s", temp);
             getchar();
             char path[100];
             char c = getchar();
-            if(c == '"') {
+            if (c == '"')
+            {
                 getchar();
-                scanf("%[^\"]s",path);
+                scanf("%[^\"]s", path);
                 getchar();
             }
-            else if(c == '/') scanf("%s",path);
+            else if (c == '/')
+                scanf("%s", path);
             getchar();
-            scanf("%s",temp);
+            scanf("%s", temp);
             getchar();
             char str[100] = {};
             c = getchar();
             getstring(c, str);
-            scanf("%s",temp);
+            scanf("%s", temp);
             int line, point;
-            scanf(" %d:%d",&line ,&point);
-            insert(path,str,line,point);
+            scanf(" %d:%d", &line, &point);
+            insert(path, str, line, point);
         }
 
-        else if(strcmp(command,"cat") == 0) {
+        else if (strcmp(command, "cat") == 0)
+        {
             getchar();
-            scanf("%s",temp);
+            scanf("%s", temp);
             getchar();
             char path[100];
             gets(path);
             cat(path);
         }
 
-        else if(strcmp(command,"removestr") == 0) {
+        else if (strcmp(command, "removestr") == 0)
+        {
             getchar();
-            scanf("%s",temp);
+            scanf("%s", temp);
             getchar();
             char c = getchar();
             char path[100];
-            if(c == '"') {
+            if (c == '"')
+            {
                 getchar();
-                scanf("%[^\"]s",path);
+                scanf("%[^\"]s", path);
                 getchar();
             }
-            else if(c == '/') scanf("%s",path);
+            else if (c == '/')
+                scanf("%s", path);
             getchar();
-            scanf("%s",temp);
+            scanf("%s", temp);
             int line, point;
             scanf(" %d:%d ", &line, &point);
-            scanf("%s",temp);
-            int size; 
+            scanf("%s", temp);
+            int size;
             char type;
             scanf(" %d -%c", &size, &type);
             removestr(path, line, point, size, type);
         }
 
-        else if(strcmp(command,"copystr") == 0) {
+        else if (strcmp(command, "copystr") == 0)
+        {
             getchar();
-            scanf("%s",temp);
+            scanf("%s", temp);
             getchar();
             char c = getchar();
             char path[100];
-            if(c == '"') {
+            if (c == '"')
+            {
                 getchar();
-                scanf("%[^\"]s",path);
+                scanf("%[^\"]s", path);
                 getchar();
             }
-            else if(c == '/') scanf("%s",path);
+            else if (c == '/')
+                scanf("%s", path);
             getchar();
-            scanf("%s",temp);
+            scanf("%s", temp);
             int line, point;
             scanf(" %d:%d ", &line, &point);
-            scanf("%s",temp);
-            int size; 
+            scanf("%s", temp);
+            int size;
             char type;
             scanf(" %d -%c", &size, &type);
             copy(path, line, point, size, type);
         }
 
-        else if(strcmp(command,"cutstr") == 0) {
+        else if (strcmp(command, "cutstr") == 0)
+        {
             getchar();
-            scanf("%s",temp);
+            scanf("%s", temp);
             getchar();
             char c = getchar();
             char path[100];
-            if(c == '"') {
+            if (c == '"')
+            {
                 getchar();
-                scanf("%[^\"]s",path);
+                scanf("%[^\"]s", path);
                 getchar();
             }
-            else if(c == '/') scanf("%s",path);
+            else if (c == '/')
+                scanf("%s", path);
             getchar();
-            scanf("%s",temp);
+            scanf("%s", temp);
             int line, point;
             scanf(" %d:%d ", &line, &point);
-            scanf("%s",temp);
-            int size; 
+            scanf("%s", temp);
+            int size;
             char type;
             scanf(" %d -%c", &size, &type);
             cut(path, line, point, size, type);
         }
 
-        else if(strcmp(command,"pastestr") == 0) {
+        else if (strcmp(command, "pastestr") == 0)
+        {
             getchar();
-            scanf("%s",temp);
+            scanf("%s", temp);
             getchar();
             char c = getchar();
             char path[100];
-            if(c == '"') {
+            if (c == '"')
+            {
                 getchar();
-                scanf("%[^\"]s",path);
+                scanf("%[^\"]s", path);
                 getchar();
             }
-            else if(c == '/') scanf("%s",path);
+            else if (c == '/')
+                scanf("%s", path);
             getchar();
-            scanf("%s",temp);
+            scanf("%s", temp);
             int line, point;
             scanf(" %d:%d", &line, &point);
             paste(path, line, point);
         }
 
+        else if (strcmp(command, "auto-indent") == 0)
+        {
+            getchar();
+            char path[100];
+            gets(path);
+            ClosingPairs(path);
+        }
     }
-
 }
 
-void BackslashFix(char str[]){
-    for(int i = 0; str[i] != '\0'; i++){
-        if(str[i] == '\\'){
-            if(str[i + 1] == 'n'){
+void BackslashFix(char str[])
+{
+    for (int i = 0; str[i] != '\0'; i++)
+    {
+        if (str[i] == '\\')
+        {
+            if (str[i + 1] == 'n')
+            {
                 str[i] = '\n';
-                memmove( &str[i + 1], &str[i + 2], strlen(str) - i - 1);
+                memmove(&str[i + 1], &str[i + 2], strlen(str) - i - 1);
             }
-            else if(str[i + 1] == '\\'){
+            else if (str[i + 1] == '\\')
+            {
                 str[i] = '\\';
-                memmove( &str[i + 1], &str[i + 2], strlen(str) - i - 1);
+                memmove(&str[i + 1], &str[i + 2], strlen(str) - i - 1);
             }
-            else if(str[i + 1] == '\n'){
+            else if (str[i + 1] == '\n')
+            {
                 str[i] = '"';
-                memmove( &str[i + 1], &str[i + 2], strlen(str) - i - 1);
+                memmove(&str[i + 1], &str[i + 2], strlen(str) - i - 1);
             }
         }
     }
 }
 
-void getstring(char c, char str[]){
-    if(c == '"'){
+void getstring(char c, char str[])
+{
+    if (c == '"')
+    {
         int d;
         int i = 0;
         c = getchar();
@@ -223,54 +254,66 @@ void getstring(char c, char str[]){
             str[i + 1] = '\0';
             i++;
             c = getchar();
-            if(c == '"' && d == '\\'){
+            if (c == '"' && d == '\\')
+            {
                 c = '\n';
             }
         }
         BackslashFix(str);
     }
-    else{
+    else
+    {
         char str2[100];
-        scanf("%s",str2);
+        scanf("%s", str2);
         str[0] = c;
         strcat(str, str2);
     }
     getchar();
 }
 
-void createfile(char path[]){
+void createfile(char path[])
+{
     int p = strlen(path);
     FILE *file;
     char dir[100];
     int l;
-    if(path[0] == '/') l = 1;
-    else if(path[0] == '"') l = 2;
-    for(int i = l; i < p; i++){
-        if(path[i] != '"'){
+    if (path[0] == '/')
+        l = 1;
+    else if (path[0] == '"')
+        l = 2;
+    for (int i = l; i < p; i++)
+    {
+        if (path[i] != '"')
+        {
             dir[i - l] = path[i];
             dir[i - l + 1] = '\0';
         }
-        if(path[i + 1] == '/'){
+        if (path[i + 1] == '/')
+        {
             mkdir(dir);
         }
     }
-    if(fopen(dir,"r") == 0){
-        file = fopen(dir,"w");
+    if (fopen(dir, "r") == 0)
+    {
+        file = fopen(dir, "w");
         fclose(file);
     }
-    else{
+    else
+    {
         printf("File With This Name Already Exists!\n");
         return;
     }
 }
 
-void insert(char path[],char str[],int line,int point){
-    if(fopen(path,"r") == 0){
+void insert(char path[], char str[], int line, int point)
+{
+    if (fopen(path, "r") == 0)
+    {
         printf("File With This Name Doesn't Exist!\n");
         return;
     }
     FILE *file;
-    file = fopen(path,"r");
+    file = fopen(path, "r");
     int i = 1, j = 0;
     char c;
     char beforestr[10000] = {};
@@ -278,7 +321,8 @@ void insert(char path[],char str[],int line,int point){
     while (i != line || j != point)
     {
         c = fgetc(file);
-        if(c == EOF){
+        if (c == EOF)
+        {
             printf("This Position Doesn't Exist!\n");
             fclose(file);
             return;
@@ -287,16 +331,19 @@ void insert(char path[],char str[],int line,int point){
         beforestr[x] = c;
         beforestr[x + 1] = '\0';
         x++;
-        if(c == '\n'){
+        if (c == '\n')
+        {
             i++;
             j = 0;
         }
     }
     x = 0;
     char afterstr[10000];
-    while(1){
+    while (1)
+    {
         c = fgetc(file);
-        if(c == EOF){
+        if (c == EOF)
+        {
             break;
         }
         afterstr[x] = c;
@@ -304,47 +351,57 @@ void insert(char path[],char str[],int line,int point){
         x++;
     }
     fclose(file);
-    file = fopen(path,"w");
-    fprintf(file,"%s%s%s",beforestr,str,afterstr);
+    file = fopen(path, "w");
+    fprintf(file, "%s%s%s", beforestr, str, afterstr);
     fclose(file);
 }
 
-void cat(char path[]){
-    if(path[0] == '"'){
+void cat(char path[])
+{
+    if (path[0] == '"')
+    {
         path[strlen(path) - 1] = '\0';
         memmove(&path[0], &path[2], strlen(path) - 1);
     }
-    else if(path[0] == '/'){
+    else if (path[0] == '/')
+    {
         memmove(&path[0], &path[1], strlen(path));
     }
-    if(fopen(path,"r") == 0){
+    if (fopen(path, "r") == 0)
+    {
         printf("File With This Name Doesn't Exist!\n");
         return;
     }
     FILE *file;
-    file = fopen(path,"r");
+    file = fopen(path, "r");
     char c;
     int i = 0;
     char contents[10000];
-    while(1){
+    while (1)
+    {
         c = fgetc(file);
-        if(c == EOF) break;
+        if (c == EOF)
+            break;
         contents[i] = c;
         i++;
         contents[i] = '\0';
     }
     fclose(file);
-    printf("%s\n",contents);
+    printf("%s\n", contents);
 }
 
-void removestr(char path[], int line, int point, int size, char type){
-    if(fopen(path,"r") == 0){
-        if(!isCut) printf("File With This Name Doesn't Exist!\n");
+void removestr(char path[], int line, int point, int size, char type)
+{
+    if (fopen(path, "r") == 0)
+    {
+        if (!isCut)
+            printf("File With This Name Doesn't Exist!\n");
         return;
     }
     FILE *file;
-    file = fopen(path,"r");
-    if(type == 'f'){
+    file = fopen(path, "r");
+    if (type == 'f')
+    {
         int i = 1, j = 0;
         char c;
         char rest[10000] = {};
@@ -352,8 +409,10 @@ void removestr(char path[], int line, int point, int size, char type){
         while (i != line || j != point)
         {
             c = fgetc(file);
-            if(c == EOF){
-                if(!isCut) printf("This Position Doesn't Exist!\n");
+            if (c == EOF)
+            {
+                if (!isCut)
+                    printf("This Position Doesn't Exist!\n");
                 fclose(file);
                 return;
             }
@@ -361,22 +420,28 @@ void removestr(char path[], int line, int point, int size, char type){
             rest[x] = c;
             rest[x + 1] = '\0';
             x++;
-            if(c == '\n'){
+            if (c == '\n')
+            {
                 i++;
                 j = 0;
             }
         }
-        for(int counter = 0; counter < size; counter++){
+        for (int counter = 0; counter < size; counter++)
+        {
             c = fgetc(file);
-            if(c == EOF){
-                if(!isCut) printf("Not Enough Characters to Remove\n");
+            if (c == EOF)
+            {
+                if (!isCut)
+                    printf("Not Enough Characters to Remove\n");
                 fclose(file);
                 return;
             }
         }
-        while(1){
+        while (1)
+        {
             c = fgetc(file);
-            if(c == EOF){
+            if (c == EOF)
+            {
                 break;
             }
             rest[x] = c;
@@ -384,11 +449,12 @@ void removestr(char path[], int line, int point, int size, char type){
             x++;
         }
         fclose(file);
-        file = fopen(path,"w");
-        fprintf(file,"%s",rest);
+        file = fopen(path, "w");
+        fprintf(file, "%s", rest);
         fclose(file);
     }
-    else if(type == 'b'){
+    else if (type == 'b')
+    {
         int i = 1, j = 0;
         char c;
         char rest[10000] = {};
@@ -396,8 +462,10 @@ void removestr(char path[], int line, int point, int size, char type){
         while (i != line || j != point)
         {
             c = fgetc(file);
-            if(c == EOF){
-                if(!isCut) printf("This Position Doesn't Exist!\n");
+            if (c == EOF)
+            {
+                if (!isCut)
+                    printf("This Position Doesn't Exist!\n");
                 fclose(file);
                 return;
             }
@@ -405,16 +473,19 @@ void removestr(char path[], int line, int point, int size, char type){
             rest[x] = c;
             rest[x + 1] = '\0';
             x++;
-            if(c == '\n'){
+            if (c == '\n')
+            {
                 i++;
                 j = 0;
             }
         }
         rest[strlen(rest) - size] = '\0';
         x -= size;
-        while(1){
+        while (1)
+        {
             c = fgetc(file);
-            if(c == EOF){
+            if (c == EOF)
+            {
                 break;
             }
             rest[x] = c;
@@ -422,46 +493,57 @@ void removestr(char path[], int line, int point, int size, char type){
             x++;
         }
         fclose(file);
-        file = fopen(path,"w");
-        fprintf(file,"%s",rest);
-        fclose(file);        
+        file = fopen(path, "w");
+        fprintf(file, "%s", rest);
+        fclose(file);
     }
-    else {
-        if(!isCut) printf("Invalid Type\n");
+    else
+    {
+        if (!isCut)
+            printf("Invalid Type\n");
         fclose(file);
     }
 }
 
-void copy(char path[], int line, int point, int size, char type){
-    if(fopen(path,"r") == 0){
+void copy(char path[], int line, int point, int size, char type)
+{
+    if (fopen(path, "r") == 0)
+    {
         printf("File With This Name Doesn't Exist!\n");
         return;
     }
     FILE *file;
-    file = fopen(path,"r");
-    if(type == 'f'){
+    file = fopen(path, "r");
+    if (type == 'f')
+    {
         int i = 1, j = 0;
         char c;
         while (i != line || j != point)
         {
             c = fgetc(file);
-            if(c == EOF){
+            if (c == EOF)
+            {
                 printf("This Position Doesn't Exist!\n");
                 fclose(file);
                 return;
             }
             j++;
-            if(c == '\n'){
+            if (c == '\n')
+            {
                 i++;
                 j = 0;
             }
         }
         char copy[10000] = {};
-        for(int counter = 0; counter < size; counter++){
+        for (int counter = 0; counter < size; counter++)
+        {
             c = fgetc(file);
-            if(c == EOF){
-                if (!isCut) printf("Not Enough Characters to Copy\n");
-                else printf("Not Enough Characters to Cut\n");
+            if (c == EOF)
+            {
+                if (!isCut)
+                    printf("Not Enough Characters to Copy\n");
+                else
+                    printf("Not Enough Characters to Cut\n");
                 fclose(file);
                 return;
             }
@@ -472,7 +554,8 @@ void copy(char path[], int line, int point, int size, char type){
         clipboard[0] = '\0';
         strcpy(clipboard, copy);
     }
-    else if(type == 'b'){
+    else if (type == 'b')
+    {
         int i = 1, j = 0;
         char c;
         char copy[10000] = {};
@@ -480,7 +563,8 @@ void copy(char path[], int line, int point, int size, char type){
         while (i != line || j != point)
         {
             c = fgetc(file);
-            if(c == EOF){
+            if (c == EOF)
+            {
                 printf("This Position Doesn't Exist!\n");
                 fclose(file);
                 return;
@@ -489,7 +573,8 @@ void copy(char path[], int line, int point, int size, char type){
             copy[x] = c;
             copy[x + 1] = '\0';
             x++;
-            if(c == '\n'){
+            if (c == '\n')
+            {
                 i++;
                 j = 0;
             }
@@ -499,19 +584,152 @@ void copy(char path[], int line, int point, int size, char type){
         strcpy(clipboard, copy);
         fclose(file);
     }
-    else {
+    else
+    {
         printf("Invalid Type\n");
         fclose(file);
     }
 }
 
-void cut(char path[], int line, int point, int size, char type){
+void cut(char path[], int line, int point, int size, char type)
+{
     isCut = true;
     copy(path, line, point, size, type);
     removestr(path, line, point, size, type);
     isCut = false;
 }
 
-void paste(char path[], int line, int point){
+void paste(char path[], int line, int point)
+{
     insert(path, clipboard, line, point);
+}
+
+void indenting(char contents[])
+{
+    for (int i = 0; contents[i] != '\0'; i++)
+    {
+        if ((contents[i] == ' ' || contents[i] == '\n') && (contents[i - 1] == '{' || contents[i - 1] == '}'))
+        {
+            memmove(&contents[i], &contents[i + 1], strlen(contents) - i);
+            i--;
+        }
+        else if ((contents[i] == ' ' || contents[i] == '\n') && (contents[i + 1] == '{' || contents[i + 1] == '}'))
+        {
+            memmove(&contents[i], &contents[i + 1], strlen(contents) - i);
+            i -= 2;
+        }
+    }
+    int curlcounter = 0;
+    for (int i = 0; contents[i] != '\0'; i++)
+    {
+        if (contents[i] == '{')
+        {
+            if (i != 0 && contents[i - 1] != '\n' && contents[i - 1] != ' ')
+            {
+                memmove(&contents[i + 1], &contents[i], strlen(contents) - i + 1);
+                contents[i] = ' ';
+                i++;
+            }
+            curlcounter++;
+            if (contents[i + 1] == '}')
+            {
+                memmove(&contents[4 * (curlcounter - 1) + i + 2], &contents[i + 1], strlen(contents) - i);
+                contents[i + 1] = '\n';
+                i++;
+                for (int j = 0; j < 4 * (curlcounter - 1); j++)
+                {
+                    contents[i + 1] = ' ';
+                    i++;
+                }
+            }
+            else
+            {
+                memmove(&contents[4 * curlcounter + i + 2], &contents[i + 1], strlen(contents) - i);
+                contents[i + 1] = '\n';
+                i++;
+                for (int j = 0; j < 4 * curlcounter; j++)
+                {
+                    contents[i + 1] = ' ';
+                    i++;
+                }
+            }
+        }
+        else if (contents[i] == '}')
+        {
+            if (contents[i - 1] != '\n' && contents[i - 1] != ' ')
+            {
+                memmove(&contents[4 * (curlcounter - 1) + i + 1], &contents[i], strlen(contents) - i + 1);
+                contents[i] = '\n';
+                i++;
+                for (int j = 0; j < 4 * (curlcounter - 1); j++)
+                {
+                    contents[i] = ' ';
+                    i++;
+                }
+            }
+            curlcounter--;
+            if (contents[i + 1] == '}')
+            {
+                memmove(&contents[4 * (curlcounter - 1) + i + 2], &contents[i + 1], strlen(contents) - i);
+                contents[i + 1] = '\n';
+                i++;
+                for (int j = 0; j < 4 * (curlcounter - 1); j++)
+                {
+                    contents[i + 1] = ' ';
+                    i++;
+                }
+            }
+            else if (contents[i + 1] == ' ' || contents[i + 1] == '\n' || contents[i + 1] == '\0')
+            {
+            }
+            else
+            {
+                memmove(&contents[4 * curlcounter + i + 2], &contents[i + 1], strlen(contents) - i);
+                contents[i + 1] = '\n';
+                i++;
+                for (int j = 0; j < 4 * curlcounter; j++)
+                {
+                    contents[i + 1] = ' ';
+                    i++;
+                }
+            }
+        }
+    }
+}
+
+void ClosingPairs(char path[])
+{
+    if (path[0] == '"')
+    {
+        path[strlen(path) - 1] = '\0';
+        memmove(&path[0], &path[2], strlen(path) - 1);
+    }
+    else if (path[0] == '/')
+    {
+        memmove(&path[0], &path[1], strlen(path));
+    }
+    if (fopen(path, "r") == 0)
+    {
+        printf("File With This Name Doesn't Exist!\n");
+        return;
+    }
+    FILE *file;
+    file = fopen(path, "r");
+    char c;
+    int i = 0;
+    char contents[10000];
+    while (1)
+    {
+        c = fgetc(file);
+        if (c == EOF)
+            break;
+        contents[i] = c;
+        i++;
+        contents[i] = '\0';
+    }
+    fclose(file);
+    indenting(contents);
+    file = fopen(path, "w");
+    fprintf(file, "%s", contents);
+    fclose(file);
 }
