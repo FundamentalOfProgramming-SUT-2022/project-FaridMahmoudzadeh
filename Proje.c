@@ -37,6 +37,10 @@ void indenting(char contents[]);
 
 void ClosingPairs(char path[]);
 
+void copier(char path[]);
+
+void undo(char path[]);
+
 int main()
 {
 
@@ -212,6 +216,16 @@ void start()
             gets(path);
             ClosingPairs(path);
         }
+
+        else if (strcmp(command, "undo") == 0)
+        {
+            getchar();
+            scanf("%s", temp);
+            getchar();
+            char path[100];
+            gets(path);
+            undo(path);
+        }
     }
 }
 
@@ -312,6 +326,7 @@ void insert(char path[], char str[], int line, int point)
         printf("File With This Name Doesn't Exist!\n");
         return;
     }
+    copier(path);
     FILE *file;
     file = fopen(path, "r");
     int i = 1, j = 0;
@@ -398,6 +413,7 @@ void removestr(char path[], int line, int point, int size, char type)
             printf("File With This Name Doesn't Exist!\n");
         return;
     }
+    copier(path);
     FILE *file;
     file = fopen(path, "r");
     if (type == 'f')
@@ -593,6 +609,7 @@ void copy(char path[], int line, int point, int size, char type)
 
 void cut(char path[], int line, int point, int size, char type)
 {
+    copier(path);
     isCut = true;
     copy(path, line, point, size, type);
     removestr(path, line, point, size, type);
@@ -601,6 +618,7 @@ void cut(char path[], int line, int point, int size, char type)
 
 void paste(char path[], int line, int point)
 {
+    copier(path);
     insert(path, clipboard, line, point);
 }
 
@@ -713,6 +731,7 @@ void ClosingPairs(char path[])
         printf("File With This Name Doesn't Exist!\n");
         return;
     }
+    copier(path);
     FILE *file;
     file = fopen(path, "r");
     char c;
@@ -729,6 +748,70 @@ void ClosingPairs(char path[])
     }
     fclose(file);
     indenting(contents);
+    file = fopen(path, "w");
+    fprintf(file, "%s", contents);
+    fclose(file);
+}
+
+void copier(char path[]){
+    FILE *copy;
+    FILE *file;
+    file = fopen(path,"r");
+    char c;
+    int i = 0;
+    char contents[10000];
+    while(1){
+        c = fgetc(file);
+        if(c == EOF) break;
+        contents[i] = c;
+        i++;
+        contents[i] = '\0';
+    }
+    char copypath[100] = "/COPIES/";
+    strcat(copypath, path);
+    if(fopen(copypath + 1,"r") == 0) createfile(copypath);
+    copy = fopen(copypath + 1, "w");
+    fprintf(copy, "%s", contents);
+    fclose(copy);
+    fclose(file);
+}
+
+void undo(char path[]){
+    if (path[0] == '"')
+    {
+        path[strlen(path) - 1] = '\0';
+        memmove(&path[0], &path[2], strlen(path) - 1);
+    }
+    else if (path[0] == '/')
+    {
+        memmove(&path[0], &path[1], strlen(path));
+    }
+    if (fopen(path, "r") == 0)
+    {
+        printf("File With This Name Doesn't Exist!\n");
+        return;
+    }
+    char copypath[100] = "COPIES/";
+    strcat(copypath, path);
+    if(fopen(copypath,"r") == 0)
+    {
+        printf("There Are No Previous Actions!\n");
+        return;
+    }
+    FILE *copy;
+    FILE *file;
+    copy = fopen(copypath,"r");
+    char c;
+    int i = 0;
+    char contents[10000];
+    while(1){
+        c = fgetc(copy);
+        if(c == EOF) break;
+        contents[i] = c;
+        i++;
+        contents[i] = '\0';
+    }
+    fclose(copy);
     file = fopen(path, "w");
     fprintf(file, "%s", contents);
     fclose(file);
